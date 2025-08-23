@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+
+
+
+<!--
+HEY JACKASS
+get out my code pls
+i dont want you ruining my site
+with that said feel free to share the site around
+maybe one day ill get it ported to a server or github or smth
+-->
+
+
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>// perplexing //</title>
+  <style>
+    :root {
+      --bg: #0f1220; --panel: #151932; --accent: #7c5cff; --accent2:#21d4fd; --text:#e9edff; --muted:#9aa3c7;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial; 
+      background: var(--bg);
+      color: var(--text);
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Background Image with Blur */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #0a0a0a, #1a1a1a, #0a0a0a);
+      background-image: url('https://static.wikia.nocookie.net/flood-escape-2/images/5/55/DARK.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: blur(8px) brightness(0.3) contrast(1.2);
+      z-index: -2;
+    }
+    
+    /* Dark overlay for better text readability */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(26, 31, 60, 0.8) 0%, rgba(15, 18, 32, 0.9) 60%);
+      z-index: -1;
+    }
+    header { padding: 28px 20px 10px; text-align: center; }
+    h1 { margin: 0; font-size: 2.1rem; letter-spacing: .5px; }
+    p.sub { margin:.5rem 0 0; color: var(--muted); }
+    .shell { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .section { margin-bottom: 48px; }
+    .section-header { text-align: center; margin-bottom: 32px; }
+    .section-title { font-size: 1.8rem; margin: 0 0 8px; color: var(--accent2); }
+    .section-subtitle { color: var(--muted); font-size: 1rem; margin: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+    .card { background: linear-gradient(180deg, rgba(124,92,255,.12), rgba(124,92,255,.06) 30%, rgba(255,255,255,.02)); border: 1px solid rgba(124,92,255,.25); border-radius: 18px; padding: 16px; display:flex; flex-direction:column; gap:10px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    .card h3 { margin: 2px 0 0; font-size: 1.1rem; }
+    .tag { display:inline-block; padding:4px 10px; border-radius:999px; font-size:.75rem; letter-spacing:.2px; background:linear-gradient(90deg,var(--accent2),var(--accent)); color:#0a0f1a; font-weight:700; }
+    .btn { cursor:pointer; background: linear-gradient(90deg, var(--accent), var(--accent2)); border: none; color: #0a0f1a; font-weight: 800; padding: 10px 14px; border-radius: 12px; transition: transform .08s ease; }
+    .btn:active { transform: translateY(1px) scale(.99); }
+
+    .modal { position: fixed; inset: 0; display: none; place-items: center; padding: 16px; background: rgba(5, 7, 12, .6); backdrop-filter: blur(6px); }
+    .modal.open { display: grid; }
+    .panel { width: min(1200px, 95vw); max-height: 90vh; background: var(--panel); border:1px solid rgba(255,255,255,.08); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+    
+    /* Responsive modal adjustments */
+    @media (max-width: 768px) {
+      .panel { width: 95vw; max-height: 95vh; }
+      .panel main iframe { height: 60vh; min-height: 400px; }
+    }
+    
+    /* Panic Button */
+    .panic-button {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 9999;
+      background: linear-gradient(45deg, #ff4757, #ff3838);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .panic-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 71, 87, 0.6);
+    }
+    .panic-button:active {
+      transform: translateY(0);
+    }
+    
+    /* Patch Notes Panel */
+    .patch-notes-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9998;
+      background: linear-gradient(45deg, var(--accent), var(--accent2));
+      color: #0a0f1a;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(124, 92, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+    .patch-notes-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 92, 255, 0.5);
+    }
+    .patch-notes-toggle.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-20px);
+    }
+    
+    .patch-notes-panel {
+      position: fixed;
+      top: 0;
+      left: -400px;
+      width: 380px;
+      height: 100vh;
+      background: var(--panel);
+      border-right: 2px solid var(--accent);
+      z-index: 9997;
+      transition: left 0.3s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .patch-notes-panel.open {
+      left: 0;
+    }
+    
+    .patch-notes-header {
+      background: linear-gradient(180deg, rgba(124,92,255,.15), rgba(33,212,253,.15));
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .patch-notes-header h2 {
+      margin: 0;
+      color: var(--accent2);
+      font-size: 1.4rem;
+    }
+    .patch-notes-header .close-patch {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.2);
+      color: var(--text);
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .patch-notes-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .patch-notes-content h3 {
+      color: var(--accent2);
+      margin: 25px 0 10px 0;
+      font-size: 1.1rem;
+    }
+    .patch-notes-content h3:first-child {
+      margin-top: 0;
+    }
+    .patch-notes-content p {
+      margin: 8px 0;
+      color: var(--muted);
+    }
+    .patch-notes-content .date {
+      color: var(--accent);
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    
+    .panel header { display:flex; align-items:center; justify-content:space-between; padding: 14px 16px; background: linear-gradient(180deg, rgba(33,212,253,.08), rgba(124,92,255,.08)); }
+    .panel header h2 { margin:0; font-size:1.05rem; }
+    .panel header .mini { color: var(--muted); font-size:.88rem; }
+    .panel main { padding: 18px; display:grid; gap:10px; }
+    .row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .kbd { padding:4px 8px; border-radius:8px; border:1px solid rgba(255,255,255,.15); color:var(--muted); font-size:.85rem; }
+    canvas { background:#0b0f1e; border:1px solid rgba(255,255,255,.06); border-radius: 14px; display:block; margin-inline:auto; image-rendering: pixelated; }
+    .close { cursor:pointer; background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.18); padding:6px 10px; border-radius:10px; }
+    footer { text-align:center; color: var(--muted); padding: 12px 0 30px; font-size: .9rem; }
+    .small { font-size:.86rem; color: var(--muted); }
+    
+    /* Embedded game styles */
+    .embedded-game { background: var(--panel); border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 20px; margin-bottom: 20px; }
+    .embedded-game h3 { margin: 0 0 12px; color: var(--accent2); }
+    .embedded-game iframe { width: 100%; height: 400px; border: none; border-radius: 12px; background: var(--bg); }
+    .embedded-game .description { color: var(--muted); margin-bottom: 16px; font-size: .9rem; }
+    
+    /* Embedded games grid layout */
+    .embedded-games-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .embedded-game { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <a href="https://carres.uk" class="panic-button">🚨 PANIC</a>
+  <button class="patch-notes-toggle" id="patchNotesToggle">📝 PATCH NOTES</button>
+  <header>
+    <h1>// perplexing games //</h1>
+    <p class="sub">no internet unblocked games for yo needy ass</p>
+  </header>
+  
+  <div class="shell">
+    <!-- My Games Section -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">my games</h2>
+        <p class="section-subtitle">games i made myself that do NOT NEED WIFI!!!1!1</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <span class="tag">fresh out the stove!!1!</span>
+          <h3>snake</h3>
+          <p class="small">eat the cube and then grow (and also dont die thats a good idea)</p>
+          <button class="btn" data-open="snake">play snake</button>
+        </div>
+        <div class="card">
+          <span class="tag">first game i made ever lol</span>
+          <h3>pong (solo)</h3>
+          <p class="small">left panel is you and the right guy is a robot [vs mode in works]</p>
+          <button class="btn" data-open="pong">play pong</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Other Games Section -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">other games</h2>
+        <p class="section-subtitle">cool games from around the web [note these may be blocked and need wifi]</p>
+      </div>
+      
+      <div class="embedded-games-grid">
+        <div class="embedded-game">
+          <h3>chrome dino game</h3>
+          <p class="description">ur little dino guy runs infinitely and jumps over cacti</p>
+          <button class="btn" data-open="dino">play dino</button>
+        </div>
+        
+        <div class="embedded-game">
+          <h3>slope</h3>
+          <p class="description">slide infintiely down a slope as a ball and avoid red [i rlly like this one]</p>
+          <button class="btn" data-open="slope">play slope</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Snake Modal -->
+  <div class="modal" id="modal-snake">
+    <div class="panel">
+      <header>
+        <h2>Snake</h2>
+        <div class="row">
+          <div class="mini">controls:</div>
+          <div class="kbd">WASD / ↑ ↓ → ←</div>
+          <div class="kbd">space = pause</div>
+          <button class="close" data-close>Close</button>
+        </div>
+      </header>
+      <main>
+        <canvas id="snakeCanvas" width="480" height="480"></canvas>
+        <div class="row" style="justify-content:center; gap:16px;">
+          <button class="btn" id="snakeStart">start</button>
+          <button class="close" id="snakeReset">reset</button>
+          <span class="kbd" id="snakeScore">score: 0</span>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Pong Modal -->
+  <div class="modal" id="modal-pong">
+    <div class="panel">
+      <header>
+        <h2>pong </h2>
+        <div class="row">
+          <div class="mini">controls:</div>
+          <div class="kbd">W/S or ↑/↓</div>
+          <div class="kbd">space = pause</div>
+          <button class="close" data-close>Close</button>
+        </div>
+      </header>
+      <main>
+        <canvas id="pongCanvas" width="720" height="420"></canvas>
+        <div class="row" style="justify-content:center; gap:16px;">
+          <button class="btn" id="pongStart">start</button>
+          <button class="close" id="pongReset">reset</button>
+          <span class="kbd" id="pongScore">player: 0 | CPU: 0</span>
+        </div>
+      </main>
+    </div>
+  </div>
+
+
+
+  <!-- Chrome Dino Game Modal -->
+  <div class="modal" id="modal-dino">
+    <div class="panel">
+      <header>
+        <h2>chrome dino game</h2>
+        <div class="mini">ur little dino guy runs infinitely and jumps over cacti</div>
+        <button class="close" data-close>close</button>
+      </header>
+      <main>
+        <iframe src="https://t-rex-runner.com/?v=1" title="Chrome Dino Game" style="width: 100%; height: 70vh; min-height: 500px; max-height: 800px; border: none; border-radius: 12px;" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+      </main>
+    </div>
+  </div>
+  <!-- Slope Modal -->
+  <div class="modal" id="modal-slope">
+    <div class="panel">
+      <header>
+        <h2>slope</h2>
+        <div class="mini">slide infinitely down a slope as a ball and avoid red [i rlly like this one]</div>
+        <button class="close" data-close>Close</button>
+      </header>
+      <main>
+        <iframe src="https://y8.com/embed/slope?v=1" title="Slope Game" scrolling="no" style="width: 100%; height: 70vh; min-height: 500px; max-height: 800px; border: none; border-radius: 12px;"></iframe>
+      </main>
+    </div>
+  </div>
+
+  <footer>
+    if any of the games are blocked or dont work, email me at <a href="mailto:perpsdev@gmail.com">perpsdev@gmail.com</a>
+  </footer>
+  <footer>
+    © // perplexing // -- website made by @perps_dev [with a lil hand from cursor ai teehee]
+  </footer>
+
+  <!-- Patch Notes Panel -->
+  <div class="patch-notes-panel" id="patchNotesPanel">
+    <div class="patch-notes-header">
+      <h2>📝 Patch Notes</h2>
+      <button class="close-patch" id="closePatchNotes">✕</button>
+    </div>
+    <div class="patch-notes-content">
+      <h3>v1.2.0 - 'panic mode' update</h3>
+      <p class="date">23/08/25</p>
+      <p>- added panic button that takes you to our school website</p>
+      <p>- added this patch notes panel</p>
+      <p>- removed 2048 and wordle (sites restricted embeds + games kinda sucked)</p>
+      <p>- added contact email to footer</p>
+      
+      <h3>v1.1.0 - web games added!</h3>
+      <p class="date">22/08/25</p>
+      <p>- split site into my games and embedded games</p>
+      <p>- added 2048, wordle, chrome dino and slope</p>
+      <p>- embedded games need wifi lol soooo haha</p>
+      
+      <h3>v1.0.0 - first release</h3>
+      <p class="date">21/08/25</p>
+      <p>- created the website (duh)</p>
+      <p>- made simple snake and pong games</p>
+      <p>- gave the site this cool theme</p>
+      <p>- modal popup system for games</p>
+    </div>
+  </div>
+
+  <script>
+    // ===== Patch Notes Logic =====
+    const patchNotesToggle = document.getElementById('patchNotesToggle');
+    const patchNotesPanel = document.getElementById('patchNotesPanel');
+    const closePatchNotes = document.getElementById('closePatchNotes');
+    
+    patchNotesToggle.addEventListener('click', () => {
+      patchNotesPanel.classList.add('open');
+      patchNotesToggle.classList.add('hidden');
+    });
+    
+    closePatchNotes.addEventListener('click', () => {
+      patchNotesPanel.classList.remove('open');
+      patchNotesToggle.classList.remove('hidden');
+    });
+    
+    // Close on escape key
+    window.addEventListener('keydown', e => { 
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));
+        patchNotesPanel.classList.remove('open');
+        patchNotesToggle.classList.remove('hidden');
+      }
+    });
+    
+    // ===== Modal Logic =====
+    const openButtons = document.querySelectorAll('[data-open]');
+    const closeButtons = document.querySelectorAll('[data-close]');
+    openButtons.forEach(btn => btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-open');
+      document.getElementById('modal-' + id).classList.add('open');
+    }));
+    closeButtons.forEach(btn => btn.addEventListener('click', () => {
+      btn.closest('.modal').classList.remove('open');
+    }));
+    window.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); });
+
+    // Small helper
+    const randInt = (min, max) => (Math.floor(Math.random() * (max - min + 1)) + min);
+
+    // ===== SNAKE =====
+    ;(() => {
+      const canvas = document.getElementById('snakeCanvas');
+      const ctx = canvas.getContext('2d');
+      const size = 24; // grid cell size
+      const cellsX = canvas.width / size;
+      const cellsY = canvas.height / size;
+      let dir = {x: 1, y: 0};
+      let nextDir = {x: 1, y: 0};
+      let snake, food, loop, score, speed;
+      const scoreEl = document.getElementById('snakeScore');
+      const startBtn = document.getElementById('snakeStart');
+      const resetBtn = document.getElementById('snakeReset');
+
+      function reset() {
+        snake = [{x: 5, y: 10}];
+        dir = {x: 1, y: 0};
+        nextDir = {x: 1, y: 0};
+        food = spawnFood();
+        score = 0;
+        speed = 110; // ms per tick
+        scoreEl.textContent = `Score: ${score}`;
+        draw();
+        clearInterval(loop);
+      }
+
+      function spawnFood() {
+        let f;
+        do {
+          f = { x: randInt(0, cellsX-1), y: randInt(0, cellsY-1) };
+        } while (snake.some(s => s.x === f.x && s.y === f.y));
+        return f;
+      }
+
+      function drawCell(x, y, fill, stroke) {
+        ctx.fillStyle = fill; ctx.strokeStyle = stroke;
+        ctx.fillRect(x*size, y*size, size, size);
+        ctx.strokeRect(x*size, y*size, size, size);
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // grid glow
+        ctx.globalAlpha = .06; ctx.strokeStyle = '#7c5cff';
+        for (let x = 0; x <= canvas.width; x += size) ctx.strokeRect(x, 0, size, canvas.height);
+        for (let y = 0; y <= canvas.height; y += size) ctx.strokeRect(0, y, canvas.width, size);
+        ctx.globalAlpha = 1;
+
+        // food
+        drawCell(food.x, food.y, '#21d4fd', 'rgba(255,255,255,.08)');
+        // snake
+        snake.forEach((s,i) => drawCell(s.x, s.y, i===0 ? '#7c5cff' : 'rgba(124,92,255,.7)', 'rgba(255,255,255,.06)'));
+      }
+
+      function tick() {
+        dir = nextDir; // apply buffered direction
+        const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+        // wall collision
+        if (head.x < 0 || head.y < 0 || head.x >= cellsX || head.y >= cellsY) return gameOver();
+        // self collision
+        if (snake.some((s, i) => i && s.x === head.x && s.y === head.y)) return gameOver();
+        snake.unshift(head);
+        // food
+        if (head.x === food.x && head.y === food.y) {
+          score++; scoreEl.textContent = `Score: ${score}`;
+          if (speed > 60 && score % 3 === 0) { clearInterval(loop); speed -= 6; loop = setInterval(tick, speed); }
+          food = spawnFood();
+        } else {
+          snake.pop();
+        }
+        draw();
+      }
+
+      function gameOver() {
+        clearInterval(loop);
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = 'bold 28px system-ui';
+        ctx.fillText('Game Over — press Start', canvas.width/2, canvas.height/2);
+        ctx.restore();
+      }
+
+      // controls
+      window.addEventListener('keydown', e => {
+        const k = e.key.toLowerCase();
+        if (['arrowup','w'].includes(k) && dir.y !== 1) nextDir = {x:0,y:-1};
+        else if (['arrowdown','s'].includes(k) && dir.y !== -1) nextDir = {x:0,y:1};
+        else if (['arrowleft','a'].includes(k) && dir.x !== 1) nextDir = {x:-1,y:0};
+        else if (['arrowright','d'].includes(k) && dir.x !== -1) nextDir = {x:1,y:0};
+        else if (k === ' ') {
+          if (loop) { clearInterval(loop); loop = null; }
+          else { loop = setInterval(tick, speed); }
+        }
+      });
+
+      startBtn.addEventListener('click', () => {
+        clearInterval(loop);
+        loop = setInterval(tick, speed);
+      });
+      resetBtn.addEventListener('click', reset);
+
+      reset();
+    })();
+
+    // ===== PONG (Solo) =====
+    ;(() => {
+      const canvas = document.getElementById('pongCanvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      const PADDLE_H = 80, PADDLE_W = 12, BALL_R = 7;
+      let playerY, cpuY, ball, vx, vy, speed, running, pScore, cScore;
+      const scoreEl = document.getElementById('pongScore');
+      const startBtn = document.getElementById('pongStart');
+      const resetBtn = document.getElementById('pongReset');
+
+      function reset() {
+        playerY = (H - PADDLE_H)/2; cpuY = playerY; speed = 4.2; running = false;
+        pScore = 0; cScore = 0; newBall(); draw(); updateScore();
+      }
+      function newBall(dir = Math.random() < .5 ? -1 : 1) {
+        ball = { x: W/2, y: H/2 };
+        const angle = (Math.random()*Math.PI/3 - Math.PI/6); // -30..30 deg
+        vx = Math.cos(angle) * speed * dir;
+        vy = Math.sin(angle) * speed;
+      }
+      function updateScore(){ scoreEl.textContent = `Player: ${pScore} | CPU: ${cScore}`; }
+
+      function draw() {
+        ctx.clearRect(0,0,W,H);
+        // middle line
+        ctx.strokeStyle = 'rgba(255,255,255,.1)';
+        ctx.setLineDash([8,12]); ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke(); ctx.setLineDash([]);
+        // paddles & ball
+        ctx.fillStyle = '#21d4fd'; ctx.fillRect(16, playerY, PADDLE_W, PADDLE_H);
+        ctx.fillStyle = '#7c5cff'; ctx.fillRect(W-16-PADDLE_W, cpuY, PADDLE_W, PADDLE_H);
+        ctx.beginPath(); ctx.arc(ball.x, ball.y, BALL_R, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+      }
+
+      function tick() {
+        // move ball
+        ball.x += vx; ball.y += vy;
+        // wall bounce
+        if (ball.y < BALL_R || ball.y > H - BALL_R) vy *= -1;
+        // player paddle
+        if (ball.x - BALL_R < 16 + PADDLE_W && ball.y > playerY && ball.y < playerY + PADDLE_H) {
+          ball.x = 16 + PADDLE_W + BALL_R; vx = Math.abs(vx);
+          const rel = (ball.y - (playerY + PADDLE_H/2)) / (PADDLE_H/2);
+          vy = rel * speed * 1.2;
+          speed = Math.min(speed + 0.2, 9); vx = Math.sign(vx) * speed;
+        }
+        // CPU paddle AI
+        const target = ball.y - (PADDLE_H/2);
+        const cpuSpeed = 3.2 + Math.min(Math.abs(vx)/2, 2.5);
+        cpuY += Math.sign(target - cpuY) * Math.min(Math.abs(target - cpuY), cpuSpeed);
+        cpuY = Math.max(0, Math.min(H - PADDLE_H, cpuY));
+        // cpu collision
+        if (ball.x + BALL_R > W - 16 - PADDLE_W && ball.y > cpuY && ball.y < cpuY + PADDLE_H) {
+          ball.x = W - 16 - PADDLE_W - BALL_R; vx = -Math.abs(vx);
+          const rel = (ball.y - (cpuY + PADDLE_H/2)) / (PADDLE_H/2);
+          vy = rel * speed * 1.2;
+          speed = Math.min(speed + 0.18, 9); vx = -Math.abs(speed);
+        }
+        // score
+        if (ball.x < -10) { cScore++; updateScore(); newBall(1); }
+        if (ball.x > W + 10) { pScore++; updateScore(); newBall(-1); }
+
+        draw();
+        if (running) requestAnimationFrame(tick);
+      }
+
+      // controls
+      const keys = new Set();
+      window.addEventListener('keydown', e => { if (['w','s','arrowup','arrowdown',' '].includes(e.key.toLowerCase())) e.preventDefault(); keys.add(e.key.toLowerCase()); if (e.key===' ') toggle(); });
+      window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+      function movePlayer() {
+        if (keys.has('w') || keys.has('arrowup')) playerY -= 6;
+        if (keys.has('s') || keys.has('arrowdown')) playerY += 6;
+        playerY = Math.max(0, Math.min(H - PADDLE_H, playerY));
+      }
+
+      function loop() { if (!running) return; movePlayer(); requestAnimationFrame(loop); }
+      function toggle() { running = !running; if (running) { requestAnimationFrame(tick); requestAnimationFrame(loop); } }
+
+      startBtn.addEventListener('click', () => { if (!running) toggle(); });
+      resetBtn.addEventListener('click', reset);
+
+      reset();
+    })();
+  </script>
+</body>
+</html>
