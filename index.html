@@ -80,11 +80,11 @@ maybe one day ill get it ported to a server or github or smth
 
     .modal { position: fixed; inset: 0; display: none; place-items: center; padding: 16px; background: rgba(5, 7, 12, .6); backdrop-filter: blur(6px); }
     .modal.open { display: grid; }
-    .panel { width: min(1200px, 95vw); max-height: 90vh; background: var(--panel); border:1px solid rgba(255,255,255,.08); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+    .panel { width: min(1400px, 98vw); max-height: 95vh; background: var(--panel); border:1px solid rgba(255,255,255,.08); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
     
     /* Responsive modal adjustments */
     @media (max-width: 768px) {
-      .panel { width: 95vw; max-height: 95vh; }
+      .panel { width: 98vw; max-height: 98vh; }
       .panel main iframe { height: 60vh; min-height: 400px; }
     }
     
@@ -231,7 +231,7 @@ maybe one day ill get it ported to a server or github or smth
   </style>
 </head>
 <body>
-  <a href="https://google.com" class="panic-button">🚨 PANIC</a>
+  <a href="https://google.com" class="panic-button">🚨 PANIC [SEMICOLON KEY ; ]</a>
   <button class="patch-notes-toggle" id="patchNotesToggle">📝 PATCH NOTES</button>
   <header>
     <h1>// perplexing embeds //</h1>
@@ -280,6 +280,30 @@ maybe one day ill get it ported to a server or github or smth
           <p class="description">slide infintiely down a slope as a ball and avoid red [i rlly like this one]</p>
           <button class="btn" data-open="slope">play slope</button>
         </div>
+        
+        <div class="embedded-game">
+          <h3>2048</h3>
+          <p class="description">slide tiles to combine them and reach 2048</p>
+          <button class="btn" data-open="2048">play 2048</button>
+        </div>
+        
+        <div class="embedded-game">
+          <h3>tetris</h3>
+          <p class="description">classic block stacking puzzle game</p>
+          <button class="btn" data-open="tetris">play tetris</button>
+        </div>
+        
+        <div class="embedded-game">
+          <h3>geometry dash</h3>
+          <p class="description">rhythm-based platformer with geometric obstacles</p>
+          <button class="btn" data-open="geometrydash">play geometry dash</button>
+        </div>
+        
+        <div class="embedded-game">
+          <h3>flappy bird</h3>
+          <p class="description">tap to fly and avoid pipes</p>
+          <button class="btn" data-open="flappybird">play flappy bird</button>
+        </div>
       </div>
     </section>
   </div>
@@ -293,7 +317,7 @@ maybe one day ill get it ported to a server or github or smth
           <div class="mini">controls:</div>
           <div class="kbd">WASD / ↑ ↓ → ←</div>
           <div class="kbd">space = pause</div>
-          <button class="close" data-close>Close</button>
+          <button class="close" data-close>[Esc] ✕</button>
         </div>
       </header>
       <main>
@@ -316,7 +340,7 @@ maybe one day ill get it ported to a server or github or smth
           <div class="mini">controls:</div>
           <div class="kbd">W/S or ↑/↓</div>
           <div class="kbd">space = pause</div>
-          <button class="close" data-close>Close</button>
+          <button class="close" data-close>[Esc] ✕</button>
         </div>
       </header>
       <main>
@@ -340,9 +364,9 @@ maybe one day ill get it ported to a server or github or smth
         <div class="mini">ur little dino guy runs infinitely and jumps over cacti</div>
         <button class="close" data-close>close</button>
       </header>
-      <main>
-        <iframe src="https://t-rex-runner.com/?v=1" title="Chrome Dino Game" style="width: 100%; height: 70vh; min-height: 500px; max-height: 800px; border: none; border-radius: 12px;" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
-      </main>
+              <main>
+          <iframe src="https://chromedino.com/" title="Chrome Dino Game" scrolling="no" style="width: 100%; height: 70vh; min-height: 500px; max-height: 800px; border: none; border-radius: 12px;" loading="lazy"></iframe>
+        </main>
     </div>
   </div>
   <!-- Slope Modal -->
@@ -351,10 +375,66 @@ maybe one day ill get it ported to a server or github or smth
       <header>
         <h2>slope</h2>
         <div class="mini">slide infinitely down a slope as a ball and avoid red [i rlly like this one]</div>
-        <button class="close" data-close>Close</button>
+        <button class="close" data-close>[Esc] ✕</button>
       </header>
       <main>
         <iframe src="https://y8.com/embed/slope?v=1" title="Slope Game" scrolling="no" style="width: 100%; height: 70vh; min-height: 500px; max-height: 800px; border: none; border-radius: 12px;"></iframe>
+      </main>
+    </div>
+  </div>
+
+  <!-- 2048 Modal -->
+  <div class="modal" id="modal-2048">
+    <div class="panel">
+      <header>
+        <h2>2048</h2>
+        <div class="mini">slide tiles to combine them and reach 2048</div>
+        <button class="close" data-close>[Esc] ✕</button>
+      </header>
+      <main>
+        <iframe src="https://2048game.com/" title="2048 Game" scrolling="no" style="width: 100%; height: 70vh; min-height: 500px; max-height: 800px; border: none; border-radius: 12px;"></iframe>
+      </main>
+    </div>
+  </div>
+
+  <!-- Tetris Modal -->
+  <div class="modal" id="modal-tetris">
+    <div class="panel">
+      <header>
+        <h2>tetris</h2>
+        <div class="mini">classic block stacking puzzle game</div>
+        <button class="close" data-close>[Esc] ✕</button>
+      </header>
+      <main>
+        <iframe src="https://tetris.com/play-tetris" title="Tetris Game" scrolling="no" style="width: 50%; height: 80vh; min-height: 600px; max-height: 900px; border: none; border-radius: 12px; transform: scale(0.8); transform-origin: center center; margin: 0 auto; display: block;"></iframe>
+      </main>
+    </div>
+  </div>
+
+  <!-- Geometry Dash Modal -->
+  <div class="modal" id="modal-geometrydash">
+    <div class="panel">
+      <header>
+        <h2>geometry dash</h2>
+        <div class="mini">rhythm-based platformer with geometric obstacles</div>
+        <button class="close" data-close>[Esc] ✕</button>
+      </header>
+      <main>
+        <iframe src="https://funhtml5games.com?embed=geomdash" title="Geometry Dash Game" scrolling="no" style="width: 100%; height: 70vh; min-height: 500px; max-height: 800px; border: none; border-radius: 12px;" frameborder="0"></iframe>
+      </main>
+    </div>
+  </div>
+
+  <!-- Flappy Bird Modal -->
+  <div class="modal" id="modal-flappybird">
+    <div class="panel">
+      <header>
+        <h2>flappy bird</h2>
+        <div class="mini">tap to fly and avoid pipes</div>
+        <button class="close" data-close>[Esc] ✕</button>
+      </header>
+      <main>
+        <iframe src="https://flappybird.io/" title="Flappy Bird Game" scrolling="no" style="width: 100%; height: 70vh; min-height: 500px; max-height: 800px; border: none; border-radius: 12px;"></iframe>
       </main>
     </div>
   </div>
@@ -373,12 +453,16 @@ maybe one day ill get it ported to a server or github or smth
   <div class="patch-notes-panel" id="patchNotesPanel">
     <div class="patch-notes-header">
       <h2>📝 Patch Notes</h2>
-      <button class="close-patch" id="closePatchNotes">✕</button>
+      <button class="close-patch" id="closePatchNotes">[Esc] ✕</button>
     </div>
     <div class="patch-notes-content">
-      <h4>V2.04</h4>
-      <p>- favicon</p>
+      <h3>V3 - more games!</h3>
+      <p>- 4 new games added!</p>
+      <p>yeah thats it</p>
       
+      <h3>V2.04</h3>
+      <p>- favicon</p>
+
       <h3>V2.03</h3>
       <p>- added my socials at the footer</p>
       <p>- changed site name to further distance my actual projects from this feeble game collection website</p>
@@ -447,6 +531,13 @@ maybe one day ill get it ported to a server or github or smth
       }
     });
     
+    // Panic button activation with semicolon key
+    window.addEventListener('keydown', e => {
+      if (e.key === ';') {
+        window.location.href = 'https://google.com';
+      }
+    });
+    
     // ===== Modal Logic =====
     const openButtons = document.querySelectorAll('[data-open]');
     const closeButtons = document.querySelectorAll('[data-close]');
@@ -455,9 +546,31 @@ maybe one day ill get it ported to a server or github or smth
       document.getElementById('modal-' + id).classList.add('open');
     }));
     closeButtons.forEach(btn => btn.addEventListener('click', () => {
-      btn.closest('.modal').classList.remove('open');
+      const modal = btn.closest('.modal');
+      modal.classList.remove('open');
+      // Stop the game by reloading the iframe
+      const iframe = modal.querySelector('iframe');
+      if (iframe) {
+        iframe.src = iframe.src;
+      }
+      // Reset rally counter for Pong game
+      if (modal.id === 'modal-pong') {
+        // Trigger rally reset by dispatching a custom event
+        window.dispatchEvent(new CustomEvent('resetPongRally'));
+      }
     }));
-    window.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); });
+    window.addEventListener('keydown', e => { 
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.open').forEach(m => {
+          m.classList.remove('open');
+          // Stop the game by reloading the iframe
+          const iframe = m.querySelector('iframe');
+          if (iframe) {
+            iframe.src = iframe.src;
+          }
+        });
+      }
+    });
 
     // Small helper
     const randInt = (min, max) => (Math.floor(Math.random() * (max - min + 1)) + min);
@@ -572,14 +685,14 @@ maybe one day ill get it ported to a server or github or smth
       const ctx = canvas.getContext('2d');
       const W = canvas.width, H = canvas.height;
       const PADDLE_H = 80, PADDLE_W = 12, BALL_R = 7;
-      let playerY, cpuY, ball, vx, vy, speed, running, pScore, cScore;
+      let playerY, cpuY, ball, vx, vy, speed, running, pScore, cScore, gameTime, speedIncreaseTimer, rallyCount;
       const scoreEl = document.getElementById('pongScore');
       const startBtn = document.getElementById('pongStart');
       const resetBtn = document.getElementById('pongReset');
 
       function reset() {
         playerY = (H - PADDLE_H)/2; cpuY = playerY; speed = 4.2; running = false;
-        pScore = 0; cScore = 0; newBall(); draw(); updateScore();
+        pScore = 0; cScore = 0; gameTime = 0; speedIncreaseTimer = 0; rallyCount = 0; newBall(); draw(); updateScore();
       }
       function newBall(dir = Math.random() < .5 ? -1 : 1) {
         ball = { x: W/2, y: H/2 };
@@ -587,7 +700,7 @@ maybe one day ill get it ported to a server or github or smth
         vx = Math.cos(angle) * speed * dir;
         vy = Math.sin(angle) * speed;
       }
-      function updateScore(){ scoreEl.textContent = `Player: ${pScore} | CPU: ${cScore}`; }
+      function updateScore(){ scoreEl.textContent = `Player: ${pScore} | CPU: ${cScore} | Rally: ${rallyCount}`; }
 
       function draw() {
         ctx.clearRect(0,0,W,H);
@@ -603,6 +716,14 @@ maybe one day ill get it ported to a server or github or smth
       function tick() {
         // move ball
         ball.x += vx; ball.y += vy;
+        
+        // Increase speed over time
+        gameTime += 16; // Assuming ~60fps
+        if (gameTime - speedIncreaseTimer > 10000) { // Every 10 seconds
+          speed = Math.min(speed + 0.3, 18); // Increase speed, max 18
+          speedIncreaseTimer = gameTime;
+        }
+        
         // wall bounce
         if (ball.y < BALL_R || ball.y > H - BALL_R) vy *= -1;
         // player paddle
@@ -610,7 +731,8 @@ maybe one day ill get it ported to a server or github or smth
           ball.x = 16 + PADDLE_W + BALL_R; vx = Math.abs(vx);
           const rel = (ball.y - (playerY + PADDLE_H/2)) / (PADDLE_H/2);
           vy = rel * speed * 1.2;
-          speed = Math.min(speed + 0.2, 9); vx = Math.sign(vx) * speed;
+          speed = Math.min(speed + 0.2, 18); vx = Math.sign(vx) * speed;
+          rallyCount++; updateScore();
         }
         // CPU paddle AI
         const target = ball.y - (PADDLE_H/2);
@@ -622,11 +744,12 @@ maybe one day ill get it ported to a server or github or smth
           ball.x = W - 16 - PADDLE_W - BALL_R; vx = -Math.abs(vx);
           const rel = (ball.y - (cpuY + PADDLE_H/2)) / (PADDLE_H/2);
           vy = rel * speed * 1.2;
-          speed = Math.min(speed + 0.18, 9); vx = -Math.abs(speed);
+          speed = Math.min(speed + 0.18, 18); vx = -Math.abs(speed);
+          rallyCount++; updateScore();
         }
         // score
-        if (ball.x < -10) { cScore++; updateScore(); newBall(1); }
-        if (ball.x > W + 10) { pScore++; updateScore(); newBall(-1); }
+        if (ball.x < -10) { cScore++; rallyCount = 0; updateScore(); newBall(1); }
+        if (ball.x > W + 10) { pScore++; rallyCount = 0; updateScore(); newBall(-1); }
 
         draw();
         if (running) requestAnimationFrame(tick);
@@ -647,6 +770,15 @@ maybe one day ill get it ported to a server or github or smth
 
       startBtn.addEventListener('click', () => { if (!running) toggle(); });
       resetBtn.addEventListener('click', reset);
+
+      // Function to reset rally counter when modal closes
+      function resetRally() {
+        rallyCount = 0;
+        updateScore();
+      }
+
+      // Listen for modal close to reset rally
+      window.addEventListener('resetPongRally', resetRally);
 
       reset();
     })();
