@@ -15,6 +15,6 @@ git add .
 git commit -m "[$version] | $notes"
 
 # push using token
-git push https://$TOKEN@github.com/your-username/embeds.git main
+git push https://$TOKEN@github.com/perpsdev/embeds.git main
 
 echo "✅ Updated site: \"$notes\" and tagged as $version B]"
