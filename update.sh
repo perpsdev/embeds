@@ -1,12 +1,17 @@
+#!/bin/bash
+
+# go to the repo folder
+cd ~/Documents/embeds || { echo "Repo folder not found!"; exit 1; }
+
 # ask version number
 read -p "site version: " version
 
 # option message
 read -p "update notes: " notes
 
-#stage, commit, push
+# stage, commit, push
 git add .
 git commit -m "[$version] | $notes"
-git push
+git push origin main
 
-echo "updated site: \"$notes\" and tagged as $version B]"
+echo "✅ Updated site: \"$notes\" and tagged as $version B]"
