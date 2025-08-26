@@ -264,6 +264,12 @@ maybe one day ill get it ported to a server or github or smth
           <p class="small">fly your spaceship through space and dodge asteroids while collecting power-ups</p>
           <button class="btn" data-open="asteroid">play asteroid dodge</button>
         </div>
+        <div class="card">
+          <span class="tag">new platformer!!1!</span>
+          <h3>flood escape</h3>
+          <p class="small">climb the tower while avoiding the rising flood! activate buttons to open paths and reach the exit</p>
+          <button class="btn" data-open="floodescape">play flood escape</button>
+        </div>
       </div>
     </section>
 
@@ -383,6 +389,29 @@ maybe one day ill get it ported to a server or github or smth
     </div>
   </div>
 
+  <!-- Flood Escape Modal -->
+  <div class="modal" id="modal-floodescape">
+    <div class="panel">
+      <header>
+        <h2>flood escape</h2>
+        <div class="row">
+          <div class="mini">controls:</div>
+          <div class="kbd">WASD / ↑ ↓ → ←</div>
+          <div class="kbd">space = pause</div>
+          <button class="close" data-close>[Esc] ✕</button>
+        </div>
+      </header>
+      <main>
+        <canvas id="floodCanvas" width="720" height="480"></canvas>
+        <div class="row" style="justify-content:center; gap:16px;">
+          <button class="btn" id="floodStart">start</button>
+          <button class="close" id="floodReset">reset</button>
+          <span class="kbd" id="floodScore">score: 0</span>
+        </div>
+      </main>
+    </div>
+  </div>
+
 
 
   <!-- Chrome Dino Game Modal -->
@@ -475,7 +504,7 @@ maybe one day ill get it ported to a server or github or smth
     socials // <a href="https://github.com/perpsdev">github</a> -- <a href="https://twitter.com/perps_dev">twitter</a> -- <a href="https://tiktok.com/@perps_dev">tiktok</a> -- <a href="https://youtube.com/@perps_dev">youtube</a>
   </footer>
   <footer>
-    © // perplexing // -- website by perpsdev -- V2.03
+    © // perplexing // -- website by perpsdev -- V3
   </footer>
 
   <!-- Patch Notes Panel -->
@@ -513,7 +542,7 @@ maybe one day ill get it ported to a server or github or smth
       <p>yep, two updates on the same day!</p>
       <p>- created a github repo and turned this into a live site</p>
       <p>- will still have local file for emergency</p>
-      
+
       <h3>V1.02 - panic button update</h3>
       <p class="date">23/08/25</p>
       <p>- added panic button that takes you off the website</p>
@@ -600,6 +629,11 @@ maybe one day ill get it ported to a server or github or smth
         // Pause Asteroid game
         if (window.asteroidGame && window.asteroidGame.paused !== undefined) {
           window.asteroidGame.paused = true;
+        }
+      } else if (modal.id === 'modal-floodescape') {
+        // Pause Flood Escape game
+        if (window.floodGame && window.floodGame.paused !== undefined) {
+          window.floodGame.paused = true;
         }
       }
       
@@ -1313,6 +1347,587 @@ maybe one day ill get it ported to a server or github or smth
       
       // Expose game object globally for close button functionality
       window.asteroidGame = { paused, running, reset };
+
+      reset();
+    })();
+
+    // ===== FLOOD ESCAPE =====
+    ;(() => {
+      const canvas = document.getElementById('floodCanvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      
+      let player, platforms, buttons, exits, flood, score, running, gameTime, paused;
+      let keys = new Set();
+      const scoreEl = document.getElementById('floodScore');
+      const startBtn = document.getElementById('floodStart');
+      const resetBtn = document.getElementById('floodReset');
+      let overlayActive = false;
+      let overlayTimer = 0;
+
+      // Game objects
+      class Player {
+        constructor() {
+          this.x = 50;
+          this.y = H - 100;
+          this.width = 20;
+          this.height = 30;
+          this.vx = 0;
+          this.vy = 0;
+          this.speed = 4;
+          this.jumpPower = 12;
+          this.onGround = false;
+          this.color = '#21d4fd';
+        }
+
+        update() {
+          // Horizontal movement
+          if (keys.has('a') || keys.has('arrowleft')) this.vx = -this.speed;
+          else if (keys.has('d') || keys.has('arrowright')) this.vx = this.speed;
+          else this.vx *= 0.8;
+
+          // Jumping
+          if ((keys.has('w') || keys.has('arrowup')) && this.onGround) {
+            this.vy = -this.jumpPower;
+            this.onGround = false;
+          }
+
+          // Apply gravity
+          this.vy += 0.6;
+
+          // Update position
+          this.x += this.vx;
+          this.y += this.vy;
+
+          // Keep player in bounds
+          if (this.x < 0) this.x = 0;
+          if (this.x > W - this.width) this.x = W - this.width;
+
+          // Reset ground state
+          this.onGround = false;
+        }
+
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.fillRect(this.x, this.y, this.width, this.height);
+          
+          // Draw player details
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(this.x + 5, this.y + 5, 10, 10); // eyes
+          ctx.fillStyle = '#7c5cff';
+          ctx.fillRect(this.x + 7, this.y + 20, 6, 8); // body detail
+        }
+
+        checkCollision(platform) {
+          return this.x < platform.x + platform.width &&
+                 this.x + this.width > platform.x &&
+                 this.y < platform.y + platform.height &&
+                 this.y + this.height > platform.y;
+        }
+
+        checkButtonCollision(button) {
+          return this.x < button.x + button.width &&
+                 this.x + this.width > button.x &&
+                 this.y < button.y + button.height &&
+                 this.y + this.height > button.y;
+        }
+
+        checkExitCollision(exit) {
+          return this.x < exit.x + exit.width &&
+                 this.x + this.width > exit.x &&
+                 this.y < exit.y + exit.height &&
+                 this.y + this.height > exit.y;
+        }
+
+        checkFloodCollision() {
+          return this.y + this.height > flood.y;
+        }
+      }
+
+      class Platform {
+        constructor(x, y, width, height, color = '#7c5cff') {
+          this.x = x;
+          this.y = y;
+          this.width = width;
+          this.height = height;
+          this.color = color;
+          this.originalColor = color;
+          this.usable = false; // Platform starts as unusable
+        }
+
+        draw() {
+          // All platforms are solid and usable
+          ctx.fillStyle = '#7c5cff';
+          ctx.fillRect(this.x, this.y, this.width, this.height);
+          
+          // Add some detail
+          ctx.fillStyle = 'rgba(255,255,255,0.1)';
+          ctx.fillRect(this.x + 2, this.y + 2, this.width - 4, 2);
+        }
+      }
+
+      class Button {
+        constructor(x, y, isGreen = false) {
+          this.x = x;
+          this.y = y;
+          this.width = 20;
+          this.height = 20;
+          this.activated = false;
+          this.isGreen = false; // All buttons are blue now
+          this.color = '#21d4fd'; // All buttons are blue
+        }
+
+        draw() {
+          // Draw button with grey outline
+          ctx.fillStyle = this.activated ? '#ff4757' : this.color;
+          ctx.fillRect(this.x, this.y, this.width, this.height);
+          
+          // Grey outline
+          ctx.strokeStyle = '#808080';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(this.x, this.y, this.width, this.height);
+          
+          // Button detail
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(this.x + 4, this.y + 4, 12, 12);
+          
+          if (this.activated) {
+            ctx.fillStyle = '#ff4757';
+            ctx.fillRect(this.x + 6, this.y + 6, 8, 8);
+          }
+        }
+
+        activate() {
+          if (!this.activated) {
+            this.activated = true;
+            this.color = '#ff4757'; // Turn red when pressed
+          }
+        }
+      }
+
+      class Exit {
+        constructor(x, y, totalLocks) {
+          this.x = x;
+          this.y = y;
+          this.width = 30;
+          this.height = 40;
+          this.color = '#ffff00';
+          this.pulse = 0;
+          this.totalLocks = totalLocks;
+          this.locksLeft = totalLocks;
+        }
+
+        draw() {
+          this.pulse += 0.1;
+          
+          // Count how many buttons are activated
+          const activatedButtons = window.floodGame?.buttons?.filter(b => b.activated) || [];
+          this.locksLeft = this.totalLocks - activatedButtons.length;
+          
+          if (this.locksLeft <= 0) {
+            // Unlocked exit - neon pulsing
+            const alpha = 0.5 + Math.sin(this.pulse) * 0.3;
+            
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = '#faff00';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            
+            // Exit sign
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 16px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText('EXIT', this.x + this.width/2, this.y + this.height/2 + 5);
+            ctx.restore();
+          } else {
+            // Locked exit with lock count
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#808080';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            
+            // Lock count in red
+            ctx.fillStyle = '#ff4757';
+            ctx.font = 'bold 16px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.locksLeft.toString(), this.x + this.width/2, this.y + this.height/2 + 5);
+            ctx.restore();
+          }
+        }
+      }
+
+      class Flood {
+        constructor() {
+          this.y = H;
+          this.riseSpeed = 0.5;
+          this.color = '#0066cc';
+          this.delay = 120; // 2 seconds delay (60fps * 2)
+          this.started = false;
+        }
+
+        update() {
+          if (this.delay > 0) {
+            this.delay--;
+            return;
+          }
+          
+          if (!this.started) {
+            this.started = true;
+          }
+          
+          this.y -= this.riseSpeed;
+          if (this.y < 0) this.y = 0;
+        }
+
+        draw() {
+          // Create gradient effect
+          const gradient = ctx.createLinearGradient(0, this.y, 0, H);
+          gradient.addColorStop(0, this.color);
+          gradient.addColorStop(1, '#003366');
+          
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, this.y, W, H - this.y);
+          
+          // Add wave effect
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.globalAlpha = 0.3;
+          ctx.beginPath();
+          for (let x = 0; x < W; x += 20) {
+            const waveY = this.y + Math.sin(x * 0.02 + gameTime * 0.05) * 5;
+            if (x === 0) ctx.moveTo(x, waveY);
+            else ctx.lineTo(x, waveY);
+          }
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function ensureReachability() {
+        // Sort platforms by Y position (highest to lowest)
+        const sortedPlatforms = platforms.filter(p => !p.isFloor).sort((a, b) => a.y - b.y);
+        
+        // Ensure each platform is reachable from the one below it
+        for (let i = 0; i < sortedPlatforms.length; i++) {
+          const currentPlatform = sortedPlatforms[i];
+          const maxJumpHeight = 120; // Player jump height + buffer
+          
+          if (i === 0) {
+            // First platform should be reachable from floor
+            const floorY = H - 30;
+            if (floorY - currentPlatform.y > maxJumpHeight) {
+              currentPlatform.y = floorY - maxJumpHeight + 20; // Adjust to be reachable
+            }
+          } else {
+            // Each subsequent platform should be reachable from the previous one
+            const previousPlatform = sortedPlatforms[i - 1];
+            const distance = previousPlatform.y - currentPlatform.y;
+            
+            if (distance > maxJumpHeight) {
+              // Adjust current platform to be reachable from previous
+              currentPlatform.y = previousPlatform.y - maxJumpHeight + 20;
+            }
+          }
+        }
+      }
+
+      function generateLevel() {
+        platforms = [];
+        buttons = [];
+        exits = [];
+        
+        // Create a full floor at the bottom (above flood)
+        const floorY = H - 30; // 30 pixels above bottom
+        const floorPlatform = new Platform(0, floorY, W, 30);
+        floorPlatform.usable = true;
+        floorPlatform.isFloor = true; // Mark as floor for special handling
+        platforms.push(floorPlatform);
+        
+        // Generate random platforms with even spread from floor to exit region
+        for (let i = 0; i < 12; i++) {
+          const x = Math.random() * (W - 100);
+          
+          // Create even vertical distribution from floor to exit region
+          const floorY = H - 30; // Floor position
+          const exitY = 50; // Exit position
+          const totalHeight = floorY - exitY - 50; // Total height range (minus buffer)
+          
+          // Divide the height into sections for even distribution
+          const sectionHeight = totalHeight / 12; // 12 sections for 12 platforms
+          const sectionIndex = i; // Each platform gets its own section
+          const baseY = floorY - 50; // Start 50 pixels above floor
+          
+          // Calculate Y position within the section with some randomness
+          const sectionStart = baseY - (sectionIndex * sectionHeight);
+          const sectionEnd = sectionStart - sectionHeight;
+          const y = Math.random() * (sectionStart - sectionEnd) + sectionEnd;
+          
+          const width = Math.random() * 80 + 60;
+          const height = 20;
+          
+          // Avoid overlapping platforms
+          let overlapping = false;
+          for (let platform of platforms) {
+            if (Math.abs(x - platform.x) < 80 && Math.abs(y - platform.y) < 80) {
+              overlapping = true;
+              break;
+            }
+          }
+          
+                  if (!overlapping) {
+          const platform = new Platform(x, y, width, height);
+          platform.usable = true; // All platforms are available by default
+          platforms.push(platform);
+        }
+      }
+      
+      // Ensure platforms create a reachable path from floor to exit
+      ensureReachability();
+      
+      // Create blue buttons that unlock the exit (no platform unlocking)
+        const buttonCount = 5; // Number of buttons needed to unlock exit
+        for (let i = 0; i < buttonCount; i++) {
+          // Pick a random platform to place the button on
+          const buttonPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+          
+          const button = new Button(buttonPlatform.x + buttonPlatform.width/2 - 10, buttonPlatform.y - 25, false);
+          buttons.push(button);
+        }
+        
+        // Add exit at top right (initially locked) - ensure lock count matches button count
+        exits.push(new Exit(W - 80, 50, buttons.length));
+        
+        // Reset player position on the floor
+        player.x = 50;
+        player.y = H - 60; // On the floor platform
+        player.vx = 0;
+        player.vy = 0;
+      }
+
+      function reset() {
+        player = new Player();
+        flood = new Flood();
+        score = 0;
+        running = false;
+        paused = false;
+        gameTime = 0;
+        scoreEl.textContent = `Score: ${score}`;
+        generateLevel();
+        // Set player position on floor after level generation
+        player.x = 50;
+        player.y = H - 60;
+        // Reset flood delay
+        flood.delay = 120;
+        flood.started = false;
+        draw();
+      }
+
+      function update() {
+        if (!running || paused) return;
+
+        gameTime++;
+        
+        // If overlay is active, count down and wait
+        if (overlayActive) {
+          overlayTimer--;
+          if (overlayTimer <= 0) {
+            overlayActive = false;
+            // Start next round
+            flood.y = H;
+            flood.delay = 120;
+            flood.started = false;
+            generateLevel();
+          }
+          draw();
+          requestAnimationFrame(update);
+          return;
+        }
+        
+        // Update player
+        player.update();
+        
+        // Check platform collisions
+        player.onGround = false;
+        for (let platform of platforms) {
+          if (player.checkCollision(platform) && platform.usable) {
+            // Landing on top of platform (only if usable)
+            if (player.vy > 0 && player.y < platform.y) {
+              player.y = platform.y - player.height;
+              player.vy = 0;
+              player.onGround = true;
+            }
+          }
+        }
+        
+        // Check button collisions
+        for (let button of buttons) {
+          if (player.checkButtonCollision(button)) {
+            const wasActivated = button.activated;
+            button.activate();
+            if (!wasActivated && button.activated) {
+              // Force redraw so exit number updates immediately
+              draw();
+            }
+          }
+        }
+        
+        // Check exit collision (only if all buttons were pressed)
+        for (let exit of exits) {
+          if (player.checkExitCollision(exit)) {
+            // Check if all buttons have been pressed
+            const activatedButtons = buttons.filter(b => b.activated);
+            if (activatedButtons.length >= exit.totalLocks) {
+              // Prepare overlay for next room
+              score++;
+              scoreEl.textContent = `Score: ${score}`;
+              overlayActive = true;
+              overlayTimer = 120; // 2 seconds at ~60fps
+              
+              // Reset player to floor immediately
+              player.x = 50;
+              player.y = H - 60;
+              player.vx = 0;
+              player.vy = 0;
+              
+              draw();
+              requestAnimationFrame(update);
+              return;
+            }
+          }
+        }
+        
+        // Check flood collision
+        if (player.checkFloodCollision()) {
+          // Player drowned!
+          gameOver();
+          return;
+        }
+        
+        // Update flood
+        flood.update();
+        
+        // Check if player is in flood
+        if (player.y + player.height > flood.y) {
+          player.color = '#0066cc'; // Blue tint when in water
+        } else {
+          player.color = '#21d4fd'; // Normal color
+        }
+        
+        draw();
+        requestAnimationFrame(update);
+      }
+
+      function draw() {
+        // Clear canvas
+        ctx.fillStyle = '#0b0f1e';
+        ctx.fillRect(0, 0, W, H);
+        
+        // Draw background elements
+        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+        for (let i = 0; i < 50; i++) {
+          const x = (i * 37) % W;
+          const y = (i * 73) % H;
+          const size = Math.sin(gameTime * 0.01 + i) * 0.5 + 0.5;
+          ctx.globalAlpha = size * 0.3;
+          ctx.beginPath();
+          ctx.arc(x, y, size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        
+        // Draw flood first (behind everything)
+        flood.draw();
+        
+        // Draw game objects
+        platforms.forEach(platform => platform.draw());
+        buttons.forEach(button => button.draw());
+        exits.forEach(exit => exit.draw());
+        player.draw();
+        
+        // Draw UI
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px system-ui';
+        ctx.fillText(`Score: ${score}`, 10, 25);
+        ctx.fillText(`Flood Level: ${Math.floor((H - flood.y) / 10)}`, 10, 45);
+        
+        // Overlay between rooms
+        if (overlayActive) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(0,0,0,0.75)';
+          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 40px system-ui';
+          ctx.textAlign = 'center';
+          ctx.fillText(`room ${score + 1}`, W/2, H/2);
+          ctx.restore();
+        }
+        
+        // Draw pause text
+        if (paused) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(0,0,0,0.7)';
+          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 24px system-ui';
+          ctx.textAlign = 'center';
+          ctx.fillText('[ PAUSED ]', W/2, H/2);
+          ctx.font = '18px system-ui';
+          ctx.fillText('press space to resume', W/2, H/2 + 30);
+          ctx.restore();
+        }
+      }
+
+      function gameOver() {
+        running = false;
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#ff4757';
+        ctx.font = 'bold 36px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('DROWNED!', W/2, H/2 - 20);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '20px system-ui';
+        ctx.fillText(`Final Score: ${score}`, W/2, H/2 + 20);
+        ctx.fillText('Press Start to try again', W/2, H/2 + 50);
+        ctx.restore();
+      }
+
+      // Controls
+      window.addEventListener('keydown', e => {
+        if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) {
+          e.preventDefault();
+          keys.add(e.key.toLowerCase());
+          if (e.key === ' ') toggle();
+        } else if (e.key.toLowerCase() === 'escape') {
+          e.preventDefault();
+          paused = !paused;
+        }
+      });
+
+      window.addEventListener('keyup', e => {
+        keys.delete(e.key.toLowerCase());
+      });
+
+      function toggle() {
+        if (paused) {
+          paused = false;
+        } else {
+          running = !running;
+          if (running) {
+            requestAnimationFrame(update);
+          }
+        }
+      }
+
+      startBtn.addEventListener('click', () => {
+        if (!running) toggle();
+      });
+      
+      resetBtn.addEventListener('click', reset);
+      
+      // Expose game object globally for close button functionality
+      window.floodGame = { paused, running, reset, buttons };
 
       reset();
     })();
